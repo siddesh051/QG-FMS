@@ -455,58 +455,60 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 font-sans antialiased">
-      {/* Persistent EMS Header */}
-      <Header
-        activeWan={activeWan}
-        uptime={formatUptime(uptimeSeconds)}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
-
-      {/* Main App Layout: Left Sidebar + Right Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Collapsible Left Navigation Bar */}
-        <Sidebar
-          currentPage={currentPage}
-          onSelectPage={handleSelectPage}
-          expandedCategories={expandedCategories}
-          onToggleCategory={handleToggleCategory}
-          userRole={currentUser.role}
+    <div className="min-h-screen w-full bg-slate-100 text-slate-900 font-sans antialiased">
+      <div className="mx-auto flex h-screen w-full max-w-[1800px] flex-col overflow-hidden border-x border-slate-200/80 bg-slate-100 shadow-[0_0_0_1px_rgba(15,23,42,0.02)]">
+        {/* Persistent EMS Header */}
+        <Header
+          activeWan={activeWan}
+          uptime={formatUptime(uptimeSeconds)}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#f8fafc]">
-          <div className="w-full pb-12">
-            {!hasWritePermission && (
-              <div className="mb-5 flex items-center justify-between p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 shadow-2xs">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100 text-amber-800 shrink-0">
-                    <Lock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-xs flex items-center gap-2">
-                      <span>Read-Only Policy Enforced</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-200 text-amber-950 font-mono">
-                        {currentUser.role}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-amber-800/90 mt-0.5">
-                      Modifications are restricted for your role. Configuration changes and parameter submissions are locked in read-only mode.
-                    </p>
-                  </div>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-200/70 px-2.5 py-1 rounded-md border border-amber-300 shrink-0 hidden sm:inline-block">
-                  View Only
-                </span>
-              </div>
-            )}
+        {/* Main App Layout: Left Sidebar + Right Content */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Collapsible Left Navigation Bar */}
+          <Sidebar
+            currentPage={currentPage}
+            onSelectPage={handleSelectPage}
+            expandedCategories={expandedCategories}
+            onToggleCategory={handleToggleCategory}
+            userRole={currentUser.role}
+          />
 
-            <div className={!hasWritePermission ? 'read-only-scope' : ''}>
-              {renderContent()}
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto bg-[#f8fafc] p-4 sm:p-6 lg:p-8">
+            <div className="mx-auto w-full max-w-[1500px] pb-12">
+              {!hasWritePermission && (
+                <div className="mb-5 flex items-center justify-between p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 shadow-2xs">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-xs flex items-center gap-2">
+                        <span>Read-Only Policy Enforced</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-200 text-amber-950 font-mono">
+                          {currentUser.role}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-amber-800/90 mt-0.5">
+                        Modifications are restricted for your role. Configuration changes and parameter submissions are locked in read-only mode.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-200/70 px-2.5 py-1 rounded-md border border-amber-300 shrink-0 hidden sm:inline-block">
+                    View Only
+                  </span>
+                </div>
+              )}
+
+              <div className={!hasWritePermission ? 'read-only-scope' : ''}>
+                {renderContent()}
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+:root {
+  --flux-bg: #eef4ff;
+  --flux-bg-strong: #dfeafc;
+  --flux-surface: #ffffff;
+  --flux-surface-muted: #f8fafc;
+  --flux-surface-strong: #1a365d;
+  --flux-surface-strong-2: #0f172a;
+  --flux-text: #0f172a;
+  --flux-text-muted: #475569;
+  --flux-border: rgba(148, 163, 184, 0.32);
+  --flux-accent: #0284c7;
+  --flux-primary: #1e3a8a;
+  --flux-success: #10b981;
+  --flux-warning: #f59e0b;
+  --flux-danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--flux-bg);
+  color: var(--flux-text);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--flux-bg) 0%, #f8fafc 100%);
+  color: var(--flux-text);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  background: transparent;
+}
+
+button,
+input,
+select,
+textarea,
+label,
+span,
+strong,
+small,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(2, 132, 199, 0.18);
+}
 
 /* Role-Based Read-Only Access Enforcement */
 .read-only-scope input:not([type="search"]),
