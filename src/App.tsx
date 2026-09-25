@@ -14,7 +14,8 @@ import {
   INITIAL_WAN_INTERFACES, 
   INITIAL_CELLULAR_DIAG, 
   INITIAL_SERVICES,
-  INITIAL_DEVICE_INFO 
+  INITIAL_DEVICE_INFO,
+  INITIAL_CHANNELS
 } from './data/initialData';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
@@ -55,6 +56,9 @@ import { VpnPage } from './components/pages/security/VpnPage';
 import { FirewallPage } from './components/pages/security/FirewallPage';
 import { NetworkPage } from './components/pages/network/NetworkPage';
 import { DeviceVpnPage } from './components/pages/vpn/VpnPage';
+import { SensorOverviewPage } from './components/pages/sensor/SensorOverviewPage';
+import { SensorChannelsPage } from './components/pages/sensor/SensorChannelsPage';
+import { SensorSamplingPage } from './components/pages/sensor/SensorSamplingPage';
 
 // Diagnostics
 import { PingTestPage } from './components/pages/diagnostics/PingTestPage';
@@ -139,6 +143,7 @@ export default function App() {
 
   // Active navigation & network state
   const [currentPage, setCurrentPage] = useState<SubPageId>('overview');
+  const [sensorChannels, setSensorChannels] = useState(INITIAL_CHANNELS);
   const [activeWan, setActiveWan] = useState<WanInterfaceType>('5G');
   const [networkTech, setNetworkTech] = useState<NetworkTechnology>('5G NR SA');
 
@@ -172,6 +177,7 @@ export default function App() {
   const [expandedCategories, setExpandedCategories] = useState<Record<NavCategory, boolean>>({
     overview: false,
     connectivity: true,
+    sensors: false,
     network: false,
     vpn: true,
     security: false,
@@ -225,6 +231,13 @@ export default function App() {
       case 'wan':
       case 'wan-failover':
         return 'wanFailover';
+      case 'sensor-config':
+      case 'sensor-overview':
+      case 'sensor-channels':
+      case 'sensor-sampling':
+      case 'sensor-test':
+      case 'sensor-health':
+        return 'overview';
       case 'network-overview':
       case 'network-nat':
       case 'network-firewall':
@@ -336,7 +349,18 @@ export default function App() {
           />
         );
 
-      // 3. Network and VPN
+      // 3. Sensors
+      case 'sensor-config':
+      case 'sensor-overview':
+      case 'sensor-channels':
+        return <SensorOverviewPage channels={sensorChannels} onUpdateChannels={setSensorChannels} />;
+      case 'sensor-test':
+        return <SensorChannelsPage channels={sensorChannels} onUpdateChannels={setSensorChannels} />;
+      case 'sensor-health':
+      case 'sensor-sampling':
+        return <SensorSamplingPage />;
+
+      // 4. Network and VPN
       case 'network-overview':
       case 'network-nat':
       case 'network-firewall':

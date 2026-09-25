@@ -1,6 +1,7 @@
 export type NavCategory = 
   | 'overview'
   | 'connectivity'
+  | 'sensors'
   | 'network'
   | 'vpn'
   | 'security'
@@ -19,6 +20,13 @@ export type SubPageId =
   | 'lan'
   | 'wan'
   | 'wan-failover'
+  // Sensors
+  | 'sensor-config'
+  | 'sensor-overview'
+  | 'sensor-channels'
+  | 'sensor-sampling'
+  | 'sensor-test'
+  | 'sensor-health'
   // Network
   | 'network-overview'
   | 'network-nat'

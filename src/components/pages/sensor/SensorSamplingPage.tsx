@@ -1,164 +1,149 @@
 import React, { useState } from 'react';
-import { Cpu, Save, CheckCircle2, Sliders, Zap } from 'lucide-react';
+import { Activity, CheckCircle2, Cpu, HeartPulse, Radio, ShieldCheck, Wifi } from 'lucide-react';
+
+const tabs = ['status', 'signals', 'system', 'connectivity'] as const;
+type HealthTab = (typeof tabs)[number];
 
 export const SensorSamplingPage: React.FC = () => {
-  const [adcClock, setAdcClock] = useState('48 MHz');
-  const [bufferSize, setBufferSize] = useState('2048 samples');
-  const [dmaMode, setDmaMode] = useState('Circular Ring Buffer (Zero Copy)');
-  const [filterType, setFilterType] = useState('Digital Sinc4 + 50/60Hz Rejection');
-  const [burstTrigger, setBurstTrigger] = useState('Continuous');
-  const [globalLoggingRate, setGlobalLoggingRate] = useState('100');
-  const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<HealthTab>('status');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'status':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              ['Analog inputs', '12 healthy / 4 active', 'Signal conditioning stable'],
+              ['Digital inputs', '4 online', 'Thresholds within tolerance'],
+              ['Alert state', 'No critical alarms', 'Monitoring steady'],
+            ].map(([title, value, detail]) => (
+              <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="font-semibold text-slate-800 mb-2">{title}</div>
+                <div className="text-sm font-bold text-slate-900">{value}</div>
+                <div className="mt-2 text-[11px] text-slate-600">{detail}</div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'signals':
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                ['CH01 Pressure', 'Healthy', '14.82 mA', 'Within range'],
+                ['CH09 Voltage', 'Healthy', '6.42 V', 'Stable'],
+                ['CH13 Digital', 'Healthy', 'ON', 'Interlock OK'],
+                ['CH16 Digital', 'Healthy', 'OFF', 'Idle state'],
+              ].map(([name, state, reading, note]) => (
+                <div key={name} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-semibold text-slate-800">{name}</div>
+                    <span className="inline-flex rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-[10px] font-semibold">{state}</span>
+                  </div>
+                  <div className="mt-2 text-sm font-bold text-slate-900">{reading}</div>
+                  <div className="mt-1 text-[11px] text-slate-600">{note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      case 'system':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              ['ADC', 'Healthy', '16-bit conversion stable'],
+              ['CPU load', '42%', 'Nominal operating load'],
+              ['Memory', '8.2 GB used', 'Available margin remains'],
+              ['Storage', '31%', 'No capacity issue'],
+            ].map(([title, state, detail]) => (
+              <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="font-semibold text-slate-800 mb-2">{title}</div>
+                <div className="inline-flex rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 font-semibold text-[10px]">{state}</div>
+                <div className="mt-2 text-xs text-slate-700">{detail}</div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'connectivity':
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              ['Cellular modem', 'Connected', 'Network registered to LTE'],
+              ['Ethernet', 'Connected', 'Link up at 1 Gbps'],
+              ['Wi-Fi', 'Standby', 'Available interface ready'],
+              ['Time sync', 'Synchronized', 'GNSS / RTC valid'],
+            ].map(([title, state, detail]) => (
+              <div key={title} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="font-semibold text-slate-800 mb-2">{title}</div>
+                <div className="inline-flex rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 font-semibold text-[10px]">{state}</div>
+                <div className="mt-2 text-xs text-slate-700">{detail}</div>
+              </div>
+            ))}
+          </div>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="space-y-6 max-w-7xl">
       <div className="bg-[#1a365d] rounded-xl px-5 py-4 text-white shadow-xs">
         <div className="flex items-center gap-1.5 text-xs text-sky-200/90 font-mono mb-1">
-          <span className="text-sky-300 font-semibold">Sensor Config</span>
-          <span className="text-sky-400/50">/</span>
-          <span className="text-white font-semibold">Sampling Configuration</span>
+          <span className="text-sky-300 font-semibold">Health & Status</span>
         </div>
         <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-sky-300" />
-          ADC Subsystem & Sampling Pipeline
+          <HeartPulse className="w-5 h-5 text-sky-300" />
+          Health & Status
         </h1>
         <p className="text-xs text-sky-100/85 mt-1">
-          Low-level analog converter clocking, DMA circular memory buffers, and digital decimation filters.
+          Read-only operational view of the sensor acquisition system, device health, and connectivity state.
         </p>
       </div>
 
-      {saved && (
-        <div className="flex items-center gap-2 p-3 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md text-xs font-semibold">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>ADC hardware parameters updated. Decimation filter synced across all 16 channels.</span>
-        </div>
-      )}
-
       <div className="bg-white rounded-lg border border-slate-200 shadow-2xs overflow-hidden">
-        <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 font-bold text-sm text-slate-900">
-          Global Hardware ADC Settings
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Internal Master ADC Clock
-              </label>
-              <select
-                value={adcClock}
-                onChange={(e) => setAdcClock(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="48 MHz">48 MHz (Standard Ultra-Low Noise)</option>
-                <option value="24 MHz">24 MHz (Low Power Mode)</option>
-                <option value="96 MHz">96 MHz (High Speed Turbo)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                DMA Buffer Size (Per Channel)
-              </label>
-              <select
-                value={bufferSize}
-                onChange={(e) => setBufferSize(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="1024 samples">1024 Samples (Low Latency)</option>
-                <option value="2048 samples">2048 Samples (Balanced)</option>
-                <option value="4096 samples">4096 Samples (High Throughput)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                DMA Transfer Architecture
-              </label>
-              <select
-                value={dmaMode}
-                onChange={(e) => setDmaMode(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="Circular Ring Buffer (Zero Copy)">
-                  Circular Ring Buffer (Zero Copy Linux Kernel DMA)
-                </option>
-                <option value="Ping-Pong Double Buffering">
-                  Ping-Pong Double Buffering
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Decimation Filter Profile
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="Digital Sinc4 + 50/60Hz Rejection">
-                  Digital Sinc4 + 50/60Hz Powerline Hum Rejection
-                </option>
-                <option value="Fast Step Sinc3">Fast Step Sinc3 (Transient Response)</option>
-                <option value="Raw Unfiltered Wideband">Raw Unfiltered Wideband</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Sampling Trigger Mode
-              </label>
-              <select
-                value={burstTrigger}
-                onChange={(e) => setBurstTrigger(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-medium focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="Continuous">Continuous Real-time Streaming</option>
-                <option value="Threshold Alarm Triggered">
-                  Threshold Alarm Triggered (Burst Buffer)
-                </option>
-                <option value="Hardware External Sync">
-                  Hardware External Sync Pulse (DI-13)
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-700 font-semibold mb-1">
-                Default Ingestion Sample Rate (SPS)
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="1000"
-                value={globalLoggingRate}
-                onChange={(e) => setGlobalLoggingRate(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded px-3 py-2 text-slate-800 font-mono focus:ring-1 focus:ring-blue-500"
-              />
-              <span className="text-[11px] text-slate-400 mt-0.5 block">
-                Up to 1,000 samples/sec per channel
-              </span>
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-slate-200 flex justify-end">
+        <div className="grid grid-cols-2 md:grid-cols-4 border-b border-slate-200 bg-slate-50">
+          {tabs.map((tab) => (
             <button
-              type="submit"
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 py-3 text-[11px] font-semibold ${
+                activeTab === tab ? 'bg-white text-[#1e3a8a] border-b-2 border-[#1e3a8a]' : 'text-slate-600 hover:bg-slate-100'
+              }`}
             >
-              <Save className="w-4 h-4" />
-              <span>Save Sampling Parameters</span>
+              {tab === 'status' ? 'Overall Status' : tab === 'signals' ? 'Signal Health' : tab === 'system' ? 'System Health' : 'Connectivity'}
             </button>
+          ))}
+        </div>
+        <div className="p-4">{renderTabContent()}</div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {[
+          ['Sensor bus', 'Online', Activity],
+          ['Signal integrity', 'Nominal', CheckCircle2],
+          ['Gateway compute', 'Healthy', Cpu],
+          ['Network link', 'Stable', Wifi],
+        ].map(([label, state, Icon]) => (
+          <div key={label} className="bg-white rounded-lg border border-slate-200 p-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] text-slate-500">{label}</div>
+              <Icon className="w-4 h-4 text-sky-600" />
+            </div>
+            <div className="mt-2 text-lg font-bold text-slate-900">{state}</div>
           </div>
-        </form>
+        ))}
+      </div>
+
+      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 flex items-start gap-3 text-xs text-emerald-900">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+        <div>
+          <div className="font-bold">Current system status</div>
+          <p className="text-emerald-800 leading-relaxed text-[11px] mt-1">
+            All sensor channels are reporting within a normal operating envelope and the gateway is in a healthy service state.
+          </p>
+        </div>
       </div>
     </div>
   );

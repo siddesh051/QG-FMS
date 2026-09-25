@@ -32,6 +32,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         return currentPage === 'overview';
       case 'connectivity':
         return ['cellular', 'apn', 'wifi', 'lan', 'wan', 'wan-failover'].includes(currentPage);
+      case 'sensors':
+        return ['sensor-config', 'sensor-overview', 'sensor-channels', 'sensor-sampling', 'sensor-test', 'sensor-health'].includes(currentPage);
       case 'network':
         return ['network-overview', 'network-nat', 'network-firewall', 'network-access-control', 'network-port-forwarding', 'network-dmz', 'network-dos', 'network-vlan', 'network-qos', 'network-link-aggregation'].includes(currentPage);
       case 'vpn':
@@ -116,7 +118,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* 3. Network */}
+        {/* 3. Sensors */}
+        <div>
+          <button
+            type="button"
+            onClick={() => onToggleCategory('sensors')}
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+              isCategoryActive('sensors') && !expandedCategories.sensors
+                ? 'bg-blue-50 text-[#1e3a8a] font-semibold'
+                : 'hover:bg-slate-50 hover:text-slate-900 text-slate-600'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Cpu className="w-4 h-4 shrink-0 text-slate-400" />
+              <span>Sensors</span>
+            </div>
+            {expandedCategories.sensors ? (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+            )}
+          </button>
+
+          {expandedCategories.sensors && (
+            <div className="ml-5 pl-2.5 my-1 border-l border-slate-200 space-y-0.5">
+              {[
+                { id: 'sensor-config', label: 'Sensor Configuration' },
+                { id: 'sensor-test', label: 'Sensor Test Mode & Commissioning' },
+                { id: 'sensor-health', label: 'Health & Status' },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onSelectPage(item.id as SubPageId)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-md text-[11.5px] transition-colors cursor-pointer ${
+                    currentPage === item.id
+                      ? 'bg-blue-50 text-[#1e3a8a] font-semibold'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100/60'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 4. Network */}
         <div>
           <button
             type="button"
