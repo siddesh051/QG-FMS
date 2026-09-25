@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Role-Based Read-Only Access Enforcement */
+.read-only-scope input:not([type="search"]),
+.read-only-scope select,
+.read-only-scope textarea {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+  background-color: #f8fafc !important;
+  opacity: 0.85 !important;
+}
+
+.read-only-scope button[type="submit"],
+.read-only-scope button[data-write-action="true"] {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.45 !important;
+}
