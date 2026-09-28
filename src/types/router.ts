@@ -56,7 +56,6 @@ export type SubPageId =
   | 'ntp-time'
   | 'snmp'
   | 'sms'
-  | 'qos'
   | 'dtu'  
   // Diagnostics
   | 'diag-ping'

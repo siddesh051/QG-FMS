@@ -96,6 +96,17 @@ export const NetworkPage: React.FC<NetworkPageProps> = ({ activeTab = 'overview'
   const [dmzEnabled, setDmzEnabled] = useState(false);
   const [dosEnabled, setDosEnabled] = useState(true);
   const [qosEnabled, setQosEnabled] = useState(true);
+  const [qosScope, setQosScope] = useState<'all' | 'cellular'>('cellular');
+  const [qosPriorityOrder, setQosPriorityOrder] = useState([
+    'Alerts and MQTT publish',
+    'Portal and API access',
+    'Firmware and backup transfers',
+    'Everything else',
+  ]);
+  const [qosDragIndex, setQosDragIndex] = useState<number | null>(null);
+  const [qosBandwidthCap, setQosBandwidthCap] = useState('2000');
+  const [qosGuaranteedMinimum, setQosGuaranteedMinimum] = useState('128');
+  const [qosSaved, setQosSaved] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
 
   const [natRules] = useState([
@@ -435,15 +446,63 @@ export const NetworkPage: React.FC<NetworkPageProps> = ({ activeTab = 'overview'
         QoS rules shown here are informational only in this frontend build. Real rule creation, modification, and enforcement require the FluxGateway backend and device adapter.
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard label="QoS Status" value={qosEnabled ? 'Enabled' : 'Disabled'} tone={qosEnabled ? 'good' : 'neutral'} />
-        <MetricCard label="Traffic Classes" value="4" />
-        <MetricCard label="Interfaces" value="2" />
-        <MetricCard label="Bandwidth" value="120 Mbps" />
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">QoS policy</h3>
+            <p className="mt-0.5 text-[11px] text-slate-500">Choose which interfaces use traffic prioritization.</p>
+          </div>
+          <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+            <input type="checkbox" checked={qosEnabled} onChange={(event) => setQosEnabled(event.target.checked)} />
+            Enable QoS
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {(['all', 'cellular'] as const).map((scope) => (
+            <button key={scope} type="button" onClick={() => setQosScope(scope)} className={`rounded-lg px-4 py-2 text-xs font-semibold ${qosScope === scope ? 'bg-[#1e3a8a] text-white' : 'border border-slate-300 text-slate-600 hover:bg-slate-50'}`}>
+              {scope === 'all' ? 'All interfaces' : 'Cellular only'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h3 className="mb-1 text-sm font-bold text-slate-900">Priority order</h3>
+        <p className="mb-4 text-[11px] text-slate-500">Higher items receive traffic priority. Drag to reorder.</p>
+        <div className="space-y-2">
+          {qosPriorityOrder.map((label, index) => (
+            <div key={label} draggable onDragStart={() => setQosDragIndex(index)} onDragOver={(event) => event.preventDefault()} onDrop={() => {
+              if (qosDragIndex === null || qosDragIndex === index) return;
+              setQosPriorityOrder((current) => {
+                const next = [...current];
+                const [moved] = next.splice(qosDragIndex, 1);
+                next.splice(index, 0, moved);
+                return next;
+              });
+              setQosDragIndex(null);
+            }} className="flex cursor-move items-center gap-3 rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-800">
+              <span className="text-slate-400">⠿</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[10px]">{index + 1}</span>
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4">
+        <h3 className="mb-4 text-sm font-bold text-slate-900">Bandwidth limits</h3>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label className="text-xs font-semibold text-slate-700">Bandwidth cap (kbps)
+            <input type="number" min="1" value={qosBandwidthCap} onChange={(event) => setQosBandwidthCap(event.target.value)} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">Guaranteed minimum, top priority (kbps)
+            <input type="number" min="1" value={qosGuaranteedMinimum} onChange={(event) => setQosGuaranteedMinimum(event.target.value)} className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-normal" />
+          </label>
+        </div>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-        <SectionHeader title="QoS Rules" subtitle="Traffic prioritization by class, interface and protocol." right={<button onClick={() => setQosEnabled((v) => !v)} className={`rounded-full px-2 py-1 text-[10px] font-bold ${qosEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{qosEnabled ? 'Enabled' : 'Disabled'}</button>} />
+        <SectionHeader title="Traffic rules" subtitle="Traffic prioritization by class, interface and protocol." right={<span className={`rounded-full px-2 py-1 text-[10px] font-bold ${qosEnabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{qosEnabled ? 'Enabled' : 'Disabled'}</span>} />
         <div className="p-4 overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[700px]">
             <thead className="bg-slate-100 text-slate-600"><tr><th className="px-3 py-2">Rule ID</th><th>Class</th><th>Priority</th><th>Interface</th><th>Protocol</th><th>Bandwidth</th><th>Status</th><th className="text-right">Actions</th></tr></thead>
@@ -453,6 +512,12 @@ export const NetworkPage: React.FC<NetworkPageProps> = ({ activeTab = 'overview'
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <div className="flex items-center gap-3">
+          {qosSaved && <span className="text-xs font-semibold text-emerald-700">QoS configuration saved.</span>}
+          <button type="button" onClick={() => { setQosSaved(true); window.setTimeout(() => setQosSaved(false), 2500); }} className="rounded-lg bg-[#1e3a8a] px-4 py-2 text-xs font-semibold text-white hover:bg-blue-900">Save QoS configuration</button>
         </div>
       </div>
     </div>

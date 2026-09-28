@@ -47,7 +47,6 @@ import { ModbusTcpPage } from './components/pages/Services/ModbusTcpPage';
 import { TlsCertificatesPage } from './components/pages/Services/TlsCertificatesPage';
 import { SnmpPage } from './components/pages/Services/SnmpPage';
 import { SmsPage } from './components/pages/Services/SmsPage';
-import { QosPage } from './components/pages/Services/QosPage';
 import { DTUPage } from './components/pages/Services/DTUPage';
 // Security & Settings
 import { UserManagementPage, UserAccount, INITIAL_USERS } from './components/pages/security/UserManagementPage';
@@ -263,7 +262,6 @@ export default function App() {
       case 'ntp-time':
       case 'snmp':
       case 'sms':
-      case 'qos':
       case 'dtu':
         return 'protocols';      
       case 'diag-ping':
@@ -385,8 +383,6 @@ export default function App() {
         return <SnmpPage />;
       case 'sms':
         return <SmsPage />;
-      case 'qos':
-        return <QosPage />;
       case 'dtu':
         return <DTUPage />;
       // 5. Diagnostics

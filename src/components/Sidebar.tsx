@@ -39,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'security':
         return ['vpn', 'firewall', 'session-settings'].includes(currentPage);
       case 'protocols':
-        return ['mqtt', 'modbus-rtu', 'modbus-tcp', 'tls-certificates', 'snmp', 'sms', 'qos', 'dtu'].includes(currentPage);
+        return ['mqtt', 'modbus-rtu', 'modbus-tcp', 'tls-certificates', 'snmp', 'sms', 'dtu'].includes(currentPage);
       case 'diagnostics':
         return ['diag-ping', 'icmp-ping', 'diag-traceroute', 'diag-logs', 'diag-cellular', 'diag-services'].includes(currentPage);
       case 'system':
@@ -247,7 +247,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 { id: 'mqtt', label: 'MQTT Client' },
                 { id: 'snmp', label: 'SNMP' },
                 { id: 'sms', label: 'SMS' },
-                { id: 'qos', label: 'QoS' },
                 { id: 'dtu', label: 'DTU / Serial Bridge' },
                 { id: 'tls-certificates', label: 'TLS Certificates' },
               ].map((item) => (                
