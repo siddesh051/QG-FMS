@@ -13,6 +13,7 @@ import {
  * Production usage: point VITE_FLUXGATEWAY_API_BASE at the real FluxGateway
  * device/EMS backend and this module will call:
  *   GET /api/interfaces/status
+ *   GET /api/interfaces/ethernet/ports
  *   GET /api/interfaces/usb
  *
  * Development fallback: when no backend is configured (or a request fails),
@@ -26,6 +27,15 @@ const API_BASE: string =
   (import.meta as unknown as { env?: Record<string, string> }).env
     ?.VITE_FLUXGATEWAY_API_BASE || '';
 const REQUEST_TIMEOUT_MS = 6000;
+
+export interface PhysicalEthernetPortStatus {
+  id: 'lan1' | 'lan2' | 'lan3' | 'lan4' | 'wan';
+  name: 'LAN1' | 'LAN2' | 'LAN3' | 'LAN4' | 'WAN';
+  type: 'LAN' | 'WAN';
+  status: 'connected' | 'disconnected' | 'connecting' | 'error' | 'unavailable';
+  speed?: string;
+  lastUpdated?: string;
+}
 
 class NoBackendConfiguredError extends Error {
   constructor() {
@@ -245,6 +255,15 @@ export async function getInterfaceStatus(): Promise<NetworkInterfaceStatus[]> {
     }
     throw err;
   }
+}
+
+/**
+ * GET /api/interfaces/ethernet/ports
+ * Physical carrier/link state for LAN1-LAN4 and WAN. This endpoint must be
+ * backed by the device Ethernet PHY/link state; no simulated fallback is used.
+ */
+export async function getPhysicalEthernetPortStatus(): Promise<PhysicalEthernetPortStatus[]> {
+  return apiFetch<PhysicalEthernetPortStatus[]>('/api/interfaces/ethernet/ports');
 }
 
 /**

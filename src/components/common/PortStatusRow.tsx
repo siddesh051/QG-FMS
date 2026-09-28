@@ -1,59 +1,56 @@
-import React, { useState } from 'react';
-import { Check, CheckCircle2 } from 'lucide-react';
-
-export interface PortState {
-  id: string;
-  name: string;
-  type: 'LAN' | 'WAN';
-  status: 'connected' | 'disconnected';
-  speed: string;
-  ip?: string;
-  cableType?: string;
-}
+import React, { useEffect, useState } from 'react';
+import { Check } from 'lucide-react';
+import { getPhysicalEthernetPortStatus, type PhysicalEthernetPortStatus } from '../../services/deviceApi';
 
 interface PortStatusRowProps {
   mode?: 'all' | 'lan' | 'wan';
-  interactive?: boolean;
-  onPortClick?: (port: PortState) => void;
-  showLabels?: boolean;
   className?: string;
 }
 
 export const PortStatusRow: React.FC<PortStatusRowProps> = ({
   mode = 'all',
-  interactive = true,
-  onPortClick,
-  showLabels = true,
   className = '',
 }) => {
-  // Default ports: LAN1-LAN4 + WAN
-  const [ports, setPorts] = useState<PortState[]>([
-    { id: 'lan1', name: 'LAN1', type: 'LAN', status: 'connected', speed: '1000 Mbps', ip: '192.168.1.101', cableType: 'Cat6 STP' },
-    { id: 'lan2', name: 'LAN2', type: 'LAN', status: 'connected', speed: '1000 Mbps', ip: '192.168.1.102', cableType: 'Cat6 STP' },
-    { id: 'lan3', name: 'LAN3', type: 'LAN', status: 'disconnected', speed: 'No Link', cableType: 'Unplugged' },
-    { id: 'lan4', name: 'LAN4', type: 'LAN', status: 'connected', speed: '100 Mbps', ip: '192.168.1.104', cableType: 'Cat5e UTP' },
-    { id: 'wan', name: 'WAN', type: 'WAN', status: 'connected', speed: '1000 Mbps', ip: '198.51.100.45', cableType: 'Cat6 STP' },
-  ]);
+  const [ports, setPorts] = useState<PhysicalEthernetPortStatus[] | null>(null);
+  const [telemetryUnavailable, setTelemetryUnavailable] = useState(false);
 
-  const togglePort = (id: string) => {
-    if (!interactive) return;
-    setPorts((prev) =>
-      prev.map((p) => {
-        if (p.id === id) {
-          const nextStatus = p.status === 'connected' ? 'disconnected' : 'connected';
-          return {
-            ...p,
-            status: nextStatus,
-            speed: nextStatus === 'connected' ? (p.id === 'lan4' ? '100 Mbps' : '1000 Mbps') : 'No Link',
-          };
+  useEffect(() => {
+    let active = true;
+    const refreshPortStatus = async () => {
+      try {
+        const status = await getPhysicalEthernetPortStatus();
+        if (active) {
+          setPorts(status);
+          setTelemetryUnavailable(false);
         }
-        return p;
-      })
-    );
-  };
+      } catch {
+        if (active) {
+          setPorts(null);
+          setTelemetryUnavailable(true);
+        }
+      }
+    };
 
-  const lanPorts = ports.filter((p) => p.type === 'LAN');
-  const wanPort = ports.find((p) => p.type === 'WAN')!;
+    refreshPortStatus();
+    const intervalId = window.setInterval(refreshPortStatus, 3000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const portNames: PhysicalEthernetPortStatus[] = [
+    { id: 'lan1', name: 'LAN1', type: 'LAN', status: 'unavailable' },
+    { id: 'lan2', name: 'LAN2', type: 'LAN', status: 'unavailable' },
+    { id: 'lan3', name: 'LAN3', type: 'LAN', status: 'unavailable' },
+    { id: 'lan4', name: 'LAN4', type: 'LAN', status: 'unavailable' },
+    { id: 'wan', name: 'WAN', type: 'WAN', status: 'unavailable' },
+  ];
+  const portStates = new Map((ports ?? []).map((port) => [port.id, port]));
+  const displayPorts = portNames.map((port) => portStates.get(port.id) ?? port);
+
+  const lanPorts = displayPorts.filter((p) => p.type === 'LAN');
+  const wanPort = displayPorts.find((p) => p.type === 'WAN')!;
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -63,15 +60,7 @@ export const PortStatusRow: React.FC<PortStatusRowProps> = ({
         {(mode === 'all' || mode === 'lan') && (
           <div className="flex items-center gap-1.5 sm:gap-2.5">
             {lanPorts.map((port) => (
-              <PortItem 
-                key={port.id} 
-                port={port} 
-                interactive={interactive} 
-                onClick={() => {
-                  togglePort(port.id);
-                  onPortClick?.(port);
-                }} 
-              />
+              <PortItem key={port.id} port={port} />
             ))}
           </div>
         )}
@@ -84,14 +73,7 @@ export const PortStatusRow: React.FC<PortStatusRowProps> = ({
         {/* WAN Port */}
         {(mode === 'all' || mode === 'wan') && wanPort && (
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            <PortItem 
-              port={wanPort} 
-              interactive={interactive} 
-              onClick={() => {
-                togglePort(wanPort.id);
-                onPortClick?.(wanPort);
-              }} 
-            />
+            <PortItem port={wanPort} />
           </div>
         )}
 
@@ -105,11 +87,7 @@ export const PortStatusRow: React.FC<PortStatusRowProps> = ({
             <span className="w-2 h-2 rounded-full bg-slate-400" />
             <span className="text-slate-500">Unplugged</span>
           </div>
-          {interactive && (
-            <span className="text-[10px] text-slate-400 font-sans italic">
-              (Click port to toggle)
-            </span>
-          )}
+          {telemetryUnavailable && <span className="text-[10px] text-amber-700">Live port status unavailable</span>}
         </div>
       </div>
     </div>
@@ -117,25 +95,30 @@ export const PortStatusRow: React.FC<PortStatusRowProps> = ({
 };
 
 interface PortItemProps {
-  port: PortState;
-  interactive: boolean;
-  onClick: () => void;
+  port: PhysicalEthernetPortStatus;
 }
 
-const PortItem: React.FC<PortItemProps> = ({ port, interactive, onClick }) => {
+const PortItem: React.FC<PortItemProps> = ({ port }) => {
   const isConnected = port.status === 'connected';
+  const statusLabel = isConnected
+    ? `Plugged In${port.speed ? ` (${port.speed})` : ''}`
+    : port.status === 'disconnected'
+      ? 'Unplugged'
+      : port.status === 'connecting'
+        ? 'Connecting'
+        : port.status === 'error'
+          ? 'Link Error'
+          : 'Unavailable';
 
   return (
     <div className="flex flex-col items-center">
       {/* Square RJ45 Port Socket Housing */}
-      <button
-        type="button"
-        onClick={onClick}
-        title={`${port.name}: ${isConnected ? `Plugged In (${port.speed})` : 'Unplugged'}${interactive ? ' - Click to toggle' : ''}`}
-        className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center transition-all cursor-pointer select-none group border ${
+      <div
+        title={`${port.name}: ${statusLabel}`}
+        className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg flex items-center justify-center select-none group border ${
           isConnected
-            ? 'bg-slate-50 border-slate-300 shadow-xs hover:border-blue-400'
-            : 'bg-slate-100 border-slate-300/80 shadow-inner opacity-80 hover:opacity-100 hover:border-slate-400'
+            ? 'bg-slate-50 border-slate-300 shadow-xs'
+            : 'bg-slate-100 border-slate-300/80 shadow-inner opacity-80'
         }`}
       >
         {/* Physical RJ45 Jack Visual representation */}
@@ -231,7 +214,7 @@ const PortItem: React.FC<PortItemProps> = ({ port, interactive, onClick }) => {
             <div className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full bg-slate-400" />
           </div>
         )}
-      </button>
+      </div>
 
       {/* Port Label underneath in blue font matching user screenshot */}
       <span className="mt-1 font-bold text-xs text-[#0284c7] tracking-tight">
@@ -240,7 +223,7 @@ const PortItem: React.FC<PortItemProps> = ({ port, interactive, onClick }) => {
 
       {/* Speed / Status subtext */}
       <span className="text-[10px] font-mono text-slate-500 font-medium">
-        {isConnected ? port.speed.replace(' Mbps', 'M') : 'Down'}
+        {isConnected ? (port.speed?.replace(' Mbps', 'M') || 'Plugged In') : statusLabel}
       </span>
     </div>
   );

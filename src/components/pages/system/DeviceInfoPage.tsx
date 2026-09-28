@@ -131,7 +131,7 @@ export const DeviceInfoPage: React.FC<DeviceInfoPageProps> = ({ deviceInfo }) =>
           </div>
 
           {/* Creative Port Status Graphic */}
-          <PortStatusRow interactive={true} />
+          <PortStatusRow />
         </div>
 
         {/* Real-Time USB Port Status (USB 1 / USB 2) */}

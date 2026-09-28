@@ -251,7 +251,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
         </div>
 
         {/* Render Creative Port Status Component with Cable Plugs and Tick Marks */}
-        <PortStatusRow interactive={true} />
+        <PortStatusRow />
       </div>
 
       {/* Connectivity Status Cards */}

@@ -145,7 +145,7 @@ export const LanPage: React.FC<LanPageProps> = ({ hasWritePermission = true }) =
         </div>
 
         {/* Visual RJ45 Ports Status (LAN1–LAN4 only) */}
-        <PortStatusRow mode="lan" interactive={true} />
+        <PortStatusRow mode="lan" />
 
         {/* 4 Port Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

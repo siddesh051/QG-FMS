@@ -69,7 +69,7 @@ export const WanPage: React.FC<WanPageProps> = ({ hasWritePermission = true }) =
             Hardware PHY link state with active patch cable and negotiation status
           </p>
         </div>
-        <PortStatusRow mode="wan" interactive={true} />
+        <PortStatusRow mode="wan" />
       </div>
 
       {/* Physical Port Status + Connection Summary */}
