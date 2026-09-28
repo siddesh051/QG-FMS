@@ -56,9 +56,6 @@ import { VpnPage } from './components/pages/security/VpnPage';
 import { FirewallPage } from './components/pages/security/FirewallPage';
 import { NetworkPage } from './components/pages/network/NetworkPage';
 import { DeviceVpnPage } from './components/pages/vpn/VpnPage';
-import { SensorOverviewPage } from './components/pages/sensor/SensorOverviewPage';
-import { SensorChannelsPage } from './components/pages/sensor/SensorChannelsPage';
-import { SensorSamplingPage } from './components/pages/sensor/SensorSamplingPage';
 
 // Diagnostics
 import { PingTestPage } from './components/pages/diagnostics/PingTestPage';
@@ -320,6 +317,7 @@ export default function App() {
             onChangeNetworkTech={setNetworkTech}
             currentUser={currentUser}
             uptime={formatUptime(uptimeSeconds)}
+            sensorChannels={sensorChannels}
           />
         );
 
@@ -348,17 +346,6 @@ export default function App() {
             hasWritePermission={hasWritePermission}
           />
         );
-
-      // 3. Sensors
-      case 'sensor-config':
-      case 'sensor-overview':
-      case 'sensor-channels':
-        return <SensorOverviewPage channels={sensorChannels} onUpdateChannels={setSensorChannels} />;
-      case 'sensor-test':
-        return <SensorChannelsPage channels={sensorChannels} onUpdateChannels={setSensorChannels} />;
-      case 'sensor-health':
-      case 'sensor-sampling':
-        return <SensorSamplingPage />;
 
       // 4. Network and VPN
       case 'network-overview':
@@ -473,6 +460,7 @@ export default function App() {
             onChangeNetworkTech={setNetworkTech}
             currentUser={currentUser}
             uptime={formatUptime(uptimeSeconds)}
+            sensorChannels={sensorChannels}
           />
         );
     }

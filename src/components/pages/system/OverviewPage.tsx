@@ -2,7 +2,8 @@ import React from 'react';
 import { 
   NetworkTechnology, 
   WanInterfaceType,
-  SubPageId
+  SubPageId,
+  SensorChannel,
 } from '../../../types/router';
 import {
   Radio,
@@ -27,6 +28,7 @@ interface OverviewPageProps {
   onChangeNetworkTech: (tech: NetworkTechnology) => void;
   currentUser?: UserAccount | null;
   uptime?: string;
+  sensorChannels: SensorChannel[];
 }
 
 export const OverviewPage: React.FC<OverviewPageProps> = ({
@@ -34,6 +36,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
   activeWan,
   networkTech,
   uptime = '14d 06h 23m 15s',
+  sensorChannels,
 }) => {
   // Telemetry metrics
   const cpuUsagePercent = 18;
@@ -458,6 +461,54 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
 
       {/* Real-Time Interface & USB Telemetry Grid (Network + Physical) */}
       <InterfaceStatusGrid />
+
+      {/* Read-only sensor and hardware health summary */}
+      <section className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+        <div className="mb-3">
+          <h2 className="text-sm font-bold text-slate-900">Sensor Health</h2>
+          <p className="text-[11px] text-slate-500 mt-1">Health status for the acquisition hardware and every sensor channel.</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+          {[
+            ['AFE', 'Healthy'],
+            ['FPGA', 'Healthy'],
+            ['SBS', 'Healthy'],
+          ].map(([name, status]) => (
+            <div key={name} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+              <span className="text-xs font-semibold text-slate-700">{name} Health</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">{status}</span>
+            </div>
+          ))}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="bg-slate-50 text-slate-600 font-semibold border-y border-slate-200">
+                <th className="py-2 px-3">Channel</th>
+                <th className="py-2 px-3">Sensor</th>
+                <th className="py-2 px-3 text-right">Health Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {sensorChannels.map((channel) => {
+                const healthy = channel.enabled && channel.status === 'Active';
+                const status = channel.status === 'Alarm' ? 'Unhealthy' : healthy ? 'Healthy' : 'Inactive';
+                return (
+                  <tr key={channel.id}>
+                    <td className="py-2 px-3 font-mono font-semibold text-slate-800">{channel.id}</td>
+                    <td className="py-2 px-3 text-slate-700">{channel.name}</td>
+                    <td className="py-2 px-3 text-right">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${healthy ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                        {status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 };
